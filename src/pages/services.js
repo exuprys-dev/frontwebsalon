@@ -22,7 +22,6 @@ const Services = () => {
                     <Service />
                     <Service />
                     <Service />
-                    <Service />
                 </div>
             </div>
             <Footer />
