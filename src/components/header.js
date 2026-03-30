@@ -8,7 +8,7 @@ const Header = () => {
             <nav className="navbar navbar-expand-lg sticky-top fixed-top">
                 <div className="container">
                     <Link className="navbar-brand" to="/">
-                        <div className="brand-logo"> 
+                        <div> 
                             <span><img
                                 src={logo}
                                 className="img-fluid rounded-top"
