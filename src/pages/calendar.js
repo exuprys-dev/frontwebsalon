@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Header from "../components/header";
 import Footer from "../components/footer";
 import "../assets/css/style.css";
+
 
 const MONTHS = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Aoû", "Sep", "Oct", "Nov", "Déc"];
 const DAY_NAMES = ["Di", "Lu", "Ma", "Me", "Je", "Ve", "Sa"];
@@ -11,6 +12,7 @@ function DatePicker() {
     const today = new Date();
     const [cur, setCur] = useState({ year: today.getFullYear(), month: today.getMonth() });
     const [selectedDate, setSelectedDate] = useState(null);
+    const location = useLocation();
     const navigate = useNavigate();
 
     const daysInMonth = new Date(cur.year, cur.month + 1, 0).getDate();
@@ -87,7 +89,7 @@ function DatePicker() {
                 <div className="btn-row">
                     <button className="btn-back" onClick={() => navigate(-1)}>&#8249; Retour</button>
                     <button className="btn-next" disabled={!selectedDate}
-                        onClick={() => navigate("/hour", { state: { date: selectedDate } })}>
+                        onClick={() => navigate("/hour", { state: { date: selectedDate, serviceId: location.state?.serviceId } })}>
                         Suivant &#8250;
                     </button>
                 </div>

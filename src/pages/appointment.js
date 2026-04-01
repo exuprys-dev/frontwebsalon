@@ -1,16 +1,37 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {useNavigate } from "react-router-dom";
 import Header from "../components/header";
 import Footer from "../components/footer";
 import "../assets/css/style.css";
+import { getAllServices } from "../api/axios";
 
-const services = [
-    { id: 1, name: "Tresses Africaines", duration: 180, price: 15000 },
-    { id: 2, name: "Coiffure & Brushing", duration: 60, price: 8000 },
-    { id: 3, name: "Soin du visage", duration: 45, price: 10000 },
-];
+
+// const services = [
+//     { id: 1, name: "Tresses Africaines", duration: 180, price: 15000 },
+//     { id: 2, name: "Coiffure & Brushing", duration: 60, price: 8000 },
+//     { id: 3, name: "Soin du visage", duration: 45, price: 10000 },
+// ];
 
 function Appointment() {
+    const [services, setServices] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    // Fetch services from API on component mount
+    useEffect(() => {
+        const fetchServices = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const data = await getAllServices();
+                setServices(Array.isArray(data) ? data : [data] ?? []);
+                setLoading(false);
+            } catch (err) {
+                setError(err.message);
+                setLoading(false);
+            }
+        };
+        fetchServices();
+    }, []);
     const [selected, setSelected] = useState(null);
     const navigate = useNavigate();
 

@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../components/header";
 import Footer from "../components/footer";
 import "../assets/css/style.css";
+import { getMyAppointments } from "../api/axios";
 
 const STATUS_MAP = {
     confirmed: { label: "Confirmé", cls: "badge-confirmed", closable: true },
@@ -11,15 +12,33 @@ const STATUS_MAP = {
 };
 
 // Ces données viendront de ton API Laravel plus tard
-const INITIAL_APPOINTMENTS = [
-    { id: 1, name: "Tresses Africaines", date: "16 mars 2026", duration: 180, price: 15000, status: "confirmed" },
-    { id: 2, name: "Tresses Africaines", date: "16 mars 2026", duration: 180, price: 15000, status: "pending" },
-    { id: 3, name: "Tresses Africaines", date: "16 mars 2026", duration: 180, price: 15000, status: "done" },
-    { id: 4, name: "Tresses Africaines", date: "16 mars 2026", duration: 180, price: 15000, status: "cancelled" },
-];
+// const INITIAL_APPOINTMENTS = [
+//     { id: 1, name: "Tresses Africaines", date: "16 mars 2026", duration: 180, price: 15000, status: "confirmed" },
+//     { id: 2, name: "Tresses Africaines", date: "16 mars 2026", duration: 180, price: 15000, status: "pending" },
+//     { id: 3, name: "Tresses Africaines", date: "16 mars 2026", duration: 180, price: 15000, status: "done" },
+//     { id: 4, name: "Tresses Africaines", date: "16 mars 2026", duration: 180, price: 15000, status: "cancelled" },
+// ];
 
 function Myappointment() {
-    const [appointments, setAppointments] = useState(INITIAL_APPOINTMENTS);
+    const [appointments, setAppointments] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchAppointments = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const data = await getMyAppointments();
+                setAppointments(data);
+                setLoading(false);
+            } catch (err) {
+                setError(err.message);
+                setLoading(false);
+            }
+        };
+        fetchAppointments();
+    }, []);
 
     const remove = (id) => setAppointments(prev => prev.filter(a => a.id !== id));
 
@@ -32,7 +51,7 @@ function Myappointment() {
 
                 <div className="appt-list">
                     {appointments.map(appt => {
-                        const s = STATUS_MAP[appt.status];
+                        const s = STATUS_MAP[appt.status] || { label: appt.status, cls: "badge-default", closable: false };
                         return (
                             <div key={appt.id} className="appt-card">
                                 <div className="appt-header">

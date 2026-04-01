@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Header from "../components/header";
 import Footer from "../components/footer";
 import "../assets/css/style.css";
+import { getOccupiedSlots } from "../api/axios";
 
 const ALL_SLOTS = [
     "9:00", "9:30", "10:00", "10:30",
@@ -13,21 +14,51 @@ const ALL_SLOTS = [
     "19:00", "19:30", "20:00", "20:30"
 ];
 
-// Ces créneaux viendront de l'API Laravel plus tard
-const UNAVAILABLE = ["12:00", "12:30", "15:30"];
-
 const MONTHS = ["janvier", "février", "mars", "avril", "mai", "juin",
     "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
 
 function HourPicker() {
     const [selected, setSelected] = useState(null);
+    const [unavailable, setUnavailable] = useState([]);
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
     const date = location.state?.date;
+    const serviceId = location.state?.serviceId;
+
+    useEffect(() => {
+        const fetchOccupied = async () => {
+            if (date) {
+                setLoading(true);
+                try {
+                    // Formatage YYYY-MM-DD pour l'API
+                    const formattedDate = `${date.y}-${String(date.m + 1).padStart(2, '0')}-${String(date.d).padStart(2, '0')}`;
+                    const occupiedSlots = await getOccupiedSlots(formattedDate);
+                    setUnavailable(occupiedSlots);
+                } catch (err) {
+                    console.error("Erreur chargement créneaux:", err);
+                } finally {
+                    setLoading(false);
+                }
+            }
+        };
+        fetchOccupied();
+    }, [date]);
 
     const dateLabel = date
         ? `${date.d} ${MONTHS[date.m]} ${date.y}`
         : "Date non sélectionnée";
+
+    // Logique pour bloquer les créneaux trop proches (Heure actuelle + 2h)
+    const now = new Date();
+    const isToday = date &&
+        date.y === now.getFullYear() &&
+        date.m === now.getMonth() &&
+        date.d === now.getDate();
+
+    // Créer un objet Date de référence pour la limite H+2
+    const limitTime = new Date();
+    limitTime.setHours(now.getHours() + 2);
 
     return (
         <>
@@ -58,21 +89,32 @@ function HourPicker() {
                 </div>
 
                 {/* Grille des créneaux */}
-                <div className="slots-grid">
-                    {ALL_SLOTS.map((slot) => {
-                        const isUnavailable = UNAVAILABLE.includes(slot);
-                        const isSelected = selected === slot;
-                        return (
-                            <div
-                                key={slot}
-                                className={`slot ${isUnavailable ? "unavailable" : ""} ${isSelected ? "selected" : ""}`}
-                                onClick={() => !isUnavailable && setSelected(slot)}
-                            >
-                                {slot}
-                            </div>
-                        );
-                    })}
-                </div>
+                {loading ? (
+                    <p className="text-center">Vérification des disponibilités...</p>
+                ) : (
+                    <div className="slots-grid">
+                        {ALL_SLOTS.map((slot) => {
+                            // On extrait l'heure et les minutes du créneau (ex: "10:30")
+                            const [h, m] = slot.split(':').map(Number);
+                            const slotDate = new Date(date.y, date.m, date.d, h, m);
+
+                            // Un créneau est indisponible s'il est déjà pris en base OU s'il est trop tôt aujourd'hui
+                            const isTooEarly = isToday && slotDate < limitTime;
+                            const isUnavailable = unavailable.includes(slot) || isTooEarly;
+
+                            const isSelected = selected === slot;
+                            return (
+                                <div
+                                    key={slot}
+                                    className={`slot ${isUnavailable ? "unavailable" : ""} ${isSelected ? "selected" : ""}`}
+                                    onClick={() => !isUnavailable && setSelected(slot)}
+                                >
+                                    {slot}
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
 
                 <div className="btn-row">
                     <button className="btn-back" onClick={() => navigate(-1)}>
@@ -82,7 +124,7 @@ function HourPicker() {
                         className="btn-next"
                         disabled={!selected}
                         onClick={() => navigate("/confirmation", {
-                            state: { date, heure: selected }
+                            state: { date, heure: selected, serviceId }
                         })}
                     >
                         Suivant &#8250;

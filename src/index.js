@@ -14,6 +14,7 @@ import HourPicker from './pages/hour';
 import Confirmation from './pages/confirmation';
 import Login from './pages/login';
 import Register from './pages/register';
+import AuthCallback from './pages/authcallback';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -29,6 +30,7 @@ root.render(
       <Route path="/myappointment" element={<Myappointment />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/auth/callback" element={<AuthCallback />} />
     </Routes>
   </BrowserRouter>
 );

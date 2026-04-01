@@ -90,7 +90,7 @@ function Dashboard() {
                                 Réservez votre prochain soin dès maintenant et offrez-vous un
                                 moment de beauté et de bien-être.
                             </p>
-                            <Link to="/appointment" class="btn-cta">
+                            <Link to="/appointment" className="btn-cta">
                                 Réservez maintenant <i class="bi bi-arrow-right"></i>
                             </Link>
                         </div>
