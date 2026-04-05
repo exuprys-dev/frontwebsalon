@@ -8,8 +8,10 @@ function AuthCallback() {
     useEffect(() => {
         const params   = new URLSearchParams(location.search);
         const token    = params.get("token");
+        const id       = params.get("id");
         const name     = params.get("name");
         const email    = params.get("email");
+        const avatar   = params.get("avatar");
         const error    = params.get("error");
 
         if (error || !token) {
@@ -19,7 +21,7 @@ function AuthCallback() {
 
         // Sauvegarde le token et les infos utilisateur
         localStorage.setItem("token", token);
-        localStorage.setItem("user", JSON.stringify({ name, email }));
+        localStorage.setItem("user", JSON.stringify({ id, name, email, avatar }));
 
         // Redirige vers la page demandée avant le login ou l'accueil
         const savedFrom = localStorage.getItem("redirectAfterLogin") || "/";

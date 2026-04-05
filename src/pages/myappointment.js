@@ -9,15 +9,8 @@ const STATUS_MAP = {
     pending: { label: "en attente", cls: "badge-pending", closable: true },
     done: { label: "terminé", cls: "badge-done", closable: false },
     cancelled: { label: "annulé", cls: "badge-cancelled", closable: false },
+    no_show: { label: "non présent", cls: "badge-noshow", closable: false },
 };
-
-// Ces données viendront de ton API Laravel plus tard
-// const INITIAL_APPOINTMENTS = [
-//     { id: 1, name: "Tresses Africaines", date: "16 mars 2026", duration: 180, price: 15000, status: "confirmed" },
-//     { id: 2, name: "Tresses Africaines", date: "16 mars 2026", duration: 180, price: 15000, status: "pending" },
-//     { id: 3, name: "Tresses Africaines", date: "16 mars 2026", duration: 180, price: 15000, status: "done" },
-//     { id: 4, name: "Tresses Africaines", date: "16 mars 2026", duration: 180, price: 15000, status: "cancelled" },
-// ];
 
 function Myappointment() {
     const [appointments, setAppointments] = useState([]);
@@ -30,10 +23,14 @@ function Myappointment() {
             setError(null);
             try {
                 const data = await getMyAppointments();
-                setAppointments(data);
+                console.log("Rendez-vous reçus:", data);
+                setAppointments(Array.isArray(data) ? data : []);
                 setLoading(false);
             } catch (err) {
+                console.log("Erreur lors du fetch",err);
                 setError(err.message);
+                setAppointments([]);
+            } finally {
                 setLoading(false);
             }
         };
@@ -48,23 +45,28 @@ function Myappointment() {
             <div className="rdv-page">
                 <h1 className="rdv-page-title">Mes <span>Rendez-vous</span></h1>
                 <p className="rdv-page-sub">Consultez et gérez vos réservations</p>
-
+                {loading && (
+                    <p className="text-center text-muted">Chargement des rendez-vous...</p>
+                )}
+                {error && (
+                    <p className="text-center text-danger">{error}</p>
+                )}
                 <div className="appt-list">
-                    {appointments.map(appt => {
-                        const s = STATUS_MAP[appt.status] || { label: appt.status, cls: "badge-default", closable: false };
+                    {!loading && !error && appointments && appointments.map((appointment) => {
+                        const s = STATUS_MAP[appointment.status] || { label: appointment.status, cls: "badge-default", closable: false };
                         return (
-                            <div key={appt.id} className="appt-card">
+                            <div key={appointment.id} className="appt-card">
                                 <div className="appt-header">
-                                    <span className="appt-name">{appt.name}</span>
+                                    <span className="appt-name">{appointment.service?.name}</span>
                                     <span className={`badge ${s.cls}`}>{s.label}</span>
                                 </div>
                                 <div className="appt-meta">
-                                    <span><i className="bi bi-calendar3"></i> {appt.date}</span>
-                                    <span><i className="bi bi-clock"></i> {appt.duration} min</span>
-                                    <span className="appt-price">{appt.price.toLocaleString()} FCFA</span>
+                                    <span><i className="bi bi-calendar3"></i> {appointment.date}</span>
+                                    <span><i className="bi bi-clock"></i> {appointment.service?.duration} min</span>
+                                    <span className="appt-price">{appointment.service?.price.toLocaleString()} FCFA</span>
                                 </div>
                                 {s.closable && (
-                                    <button className="appt-close" onClick={() => remove(appt.id)}>✕</button>
+                                    <button className="appt-close" onClick={() => remove(appointment.id)}>✕</button>
                                 )}
                             </div>
                         );

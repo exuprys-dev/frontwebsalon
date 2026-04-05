@@ -19,7 +19,8 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response?.status === 401) {
+        const isAuthRoute = error.config?.url?.includes('/auth/login') || error.config?.url?.includes('/auth/register');
+        if (error.response?.status === 401 && !isAuthRoute) {
             localStorage.removeItem("token");
             window.location.href = "/login";
         }
@@ -59,8 +60,8 @@ export const getServiceById = async (id) => {
  * GET /api/appointments/my
  */
 export const getMyAppointments = async () => {
-    const response = await api.get("/appointments/my");
-    return response.data;
+    const response = await api.get("/appointments/client");
+    return response.data.appointments;
 };
 
 export const getOccupiedSlots = async (date) => {

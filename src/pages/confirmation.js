@@ -42,8 +42,8 @@ function Confirmation() {
                 setService(serviceObj);
 
                 // 2. Préparer les données pour l'API
-                const user = JSON.parse(localStorage.getItem("user"));
-                if (!user || !user.id) {
+                const token = localStorage.getItem("token");
+                if (!token) {
                     setError("Vous devez être connecté pour réserver.");
                     return;
                 }
@@ -57,7 +57,6 @@ function Confirmation() {
                     date: formattedDate,
                     start_time: startTime,
                     end_time: endTime,
-                    client_id: user.id,
                     service_id: serviceId
                 });
 

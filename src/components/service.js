@@ -1,10 +1,11 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "../assets/css/style.css";
+import defaultImage from "../assets/images/Screenshot 2026-03-18 162102.png";
 
 
-function Service({ id, image, name, description, price, duration }) {
-    const IMAGE_URL = image ? `${process.env.REACT_APP_API_URL}/storage/images/${image}` : null;
+function Service({ id, image_url, name, description, price, duration }) {
+    const IMAGE_URL = image_url ?? defaultImage;
     const navigate = useNavigate();
     const handleReserve = () => {
         const token = localStorage.getItem("token");

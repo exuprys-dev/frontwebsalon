@@ -91,7 +91,7 @@ function Dashboard() {
                                 moment de beauté et de bien-être.
                             </p>
                             <Link to="/appointment" className="btn-cta">
-                                Réservez maintenant <i class="bi bi-arrow-right"></i>
+                                Réservez maintenant <i className="bi bi-arrow-right"></i>
                             </Link>
                         </div>
                     </div>

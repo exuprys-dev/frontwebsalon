@@ -20,7 +20,8 @@ function Login() {
         setLoading(true);
         setError("");
         try {
-            const data = await login(form); // utilise la fonction de axios.js
+            const data = await login(form); 
+            console.log("Login réussi, données reçues:", data);
             localStorage.setItem("token", data.token);
             localStorage.setItem("user", JSON.stringify(data.user));
 
@@ -59,6 +60,7 @@ function Login() {
                         className="form-input"
                         type="email"
                         name="email"
+                        autoComplete="email"
                         placeholder="votre@email.com"
                         value={form.email}
                         onChange={handleChange}
@@ -70,6 +72,7 @@ function Login() {
                         className="form-input"
                         type="password"
                         name="password"
+                        autoComplete="current-password"
                         placeholder="••••••••••••••"
                         value={form.password}
                         onChange={handleChange}
