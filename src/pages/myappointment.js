@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Header from "../components/header";
 import Footer from "../components/footer";
 import "../assets/css/style.css";
-import { getMyAppointments } from "../api/axios";
+import { getMyAppointments, deleteAppointment } from "../api/axios";
 
 const STATUS_MAP = {
     confirmed: { label: "Confirmé", cls: "badge-confirmed", closable: true },
@@ -16,6 +16,7 @@ function Myappointment() {
     const [appointments, setAppointments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [deletingId, setDeletingId] = useState(null);
 
     useEffect(() => {
         const fetchAppointments = async () => {
@@ -36,8 +37,22 @@ function Myappointment() {
         };
         fetchAppointments();
     }, []);
+    
+    const handleDelete = async (id) => {
+        const confirmed = window.confirm("Voulez-vous vraiment supprimer ce rendez-vous ?");
+        if (!confirmed) return;
 
-    const remove = (id) => setAppointments(prev => prev.filter(a => a.id !== id));
+        setDeletingId(id);
+        try {
+            await deleteAppointment(id);
+            // Supprime de la liste localement après succès API
+            setAppointments((prev) => prev.filter((a) => a.id !== id));
+        } catch (err) {
+            alert("Erreur lors de la suppression : " + err.message);
+        } finally {
+            setDeletingId(null);
+        }
+    };
 
     return (
         <>
@@ -54,6 +69,7 @@ function Myappointment() {
                 <div className="appt-list">
                     {!loading && !error && appointments && appointments.map((appointment) => {
                         const s = STATUS_MAP[appointment.status] || { label: appointment.status, cls: "badge-default", closable: false };
+                        const isDeleting = deletingId === appointment.id;
                         return (
                             <div key={appointment.id} className="appt-card">
                                 <div className="appt-header">
@@ -66,7 +82,14 @@ function Myappointment() {
                                     <span className="appt-price">{appointment.service?.price.toLocaleString()} FCFA</span>
                                 </div>
                                 {s.closable && (
-                                    <button className="appt-close" onClick={() => remove(appointment.id)}>✕</button>
+                                    <button
+                                        className="appt-close"
+                                        onClick={() => handleDelete(appointment.id)}
+                                        disabled={isDeleting}
+                                        title="Annuler ce rendez-vous"
+                                    >
+                                        {isDeleting ? "..." : "✕"}
+                                    </button>
                                 )}
                             </div>
                         );
