@@ -91,7 +91,7 @@ export const login = async (credentials) => {
 
 // Redirige vers Laravel qui redirige vers Google
 export const loginWithGoogle = () => {
-    const baseURL = "http://localhost:8000";
+    const baseURL = "http://localhost:8001";
     window.location.href = `${baseURL}/auth/google/redirect`;
 };
 
